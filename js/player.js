@@ -29,14 +29,37 @@ async function loadInfo() {
 }
 
 function buildPlayerURL() {
+  // Movie
   if (type === "movie") {
-    return currentSource === "vidfast"
-      ? `https://vidfast.pro/movie/${id}?autoPlay=true`
-      : `https://streamrip.fun/movie/${id}`;
+    switch(currentSource) {
+      case "vidfast":
+        return `https://vidfast.pro/movie/${id}?autoPlay=true`;
+      case "streamrip":
+        return `https://streamrip.fun/movie/${id}`;
+      case "2embed":
+        return `https://www.2embed.cc/embed/movie/${id}`;
+      case "multiembed":
+        // Simple embed (no VIP)
+        return `https://multiembed.mov/?video_id=${id}&tmdb=1`;
+      default:
+        return `https://vidfast.pro/movie/${id}?autoPlay=true`;
+    }
   }
-  return currentSource === "vidfast"
-    ? `https://vidfast.pro/tv/${id}/${currentSeason}/${currentEpisode}?autoPlay=true`
-    : `https://streamrip.fun/tv/${id}/${currentSeason}/${currentEpisode}`;
+
+  // TV Show
+  switch(currentSource) {
+    case "vidfast":
+      return `https://vidfast.pro/tv/${id}/${currentSeason}/${currentEpisode}?autoPlay=true`;
+    case "streamrip":
+      return `https://streamrip.fun/tv/${id}/${currentSeason}/${currentEpisode}`;
+    case "2embed":
+      return `https://www.2embed.cc/embed/tv/${id}/${currentSeason}/${currentEpisode}`;
+    case "multiembed":
+      // Simple embed with season & episode
+      return `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${currentSeason}&e=${currentEpisode}`;
+    default:
+      return `https://vidfast.pro/tv/${id}/${currentSeason}/${currentEpisode}?autoPlay=true`;
+  }
 }
 
 function loadPlayer() {
@@ -63,8 +86,6 @@ function saveContinueWatching() {
     list.push(newEntry);
   }
   localStorage.setItem('continueWatchingList', JSON.stringify(list));
-
-  // Also keep a single‑entry version for compatibility with details.js
   localStorage.setItem('continueWatching', JSON.stringify(newEntry));
 }
 

@@ -41,7 +41,16 @@
     .info-box p { opacity: 0.7; }
 
     .source-selector { display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap; align-items: center; }
-    .source-btn { padding: 10px 24px; border: 1px solid rgba(255,255,255,0.08); border-radius: 40px; background: rgba(255,255,255,0.04); color: #aaa; cursor: pointer; font-weight: 500; transition: 0.3s; }
+    .source-btn {
+      padding: 10px 24px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 40px;
+      background: rgba(255,255,255,0.04);
+      color: #aaa;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.3s;
+    }
     .source-btn.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
     .source-btn:hover { background: rgba(255,255,255,0.1); }
     #sourceStatus { margin-left: 15px; font-size: 0.85rem; opacity: 0.6; word-break: break-all; }
@@ -92,6 +101,8 @@
     <div class="source-selector">
       <button class="source-btn active" data-source="vidfast">VidFast</button>
       <button class="source-btn" data-source="streamrip">Streamrip</button>
+      <button class="source-btn" data-source="2embed">2Embed</button>
+      <button class="source-btn" data-source="multiembed">MultiEmbed</button>
       <div id="sourceStatus"></div>
     </div>
 
