@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Details</title>
+
+<link rel="stylesheet" href="css/main.css">
+
+<style>
+
+.back-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    z-index:9999;
+
+    padding:12px 20px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#00d4ff;
+    color:black;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.back-btn:hover{
+    transform:translateY(-2px);
+}
+
+.details-backdrop{
+    min-height:100vh;
+    background-size:cover;
+    background-position:center;
+}
+
+.details-overlay{
+
+    min-height:100vh;
+
+    background:linear-gradient(
+        to right,
+        rgba(0,0,0,.95),
+        rgba(0,0,0,.65)
+    );
+
+    display:flex;
+    align-items:center;
+    gap:40px;
+
+    padding:60px;
+}
+
+.poster{
+
+    width:320px;
+
+    border-radius:20px;
+
+    box-shadow:
+    0 10px 40px rgba(0,0,0,.5);
+
+}
+
+.info{
+
+    max-width:700px;
+
+}
+
+.info h1{
+
+    font-size:4rem;
+
+    margin-bottom:15px;
+
+}
+
+.info p{
+
+    line-height:1.8;
+
+    margin-bottom:20px;
+
+}
+
+.meta{
+
+    margin-bottom:25px;
+
+    color:#ccc;
+
+    font-size:18px;
+
+}
+
+#genres{
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+
+}
+
+#genres span{
+
+    background:#111827;
+
+    padding:8px 15px;
+
+    border-radius:999px;
+
+    font-size:14px;
+
+}
+
+.actions{
+
+    display:flex;
+
+    gap:15px;
+
+    margin-top:20px;
+
+}
+
+.actions button{
+
+    padding:14px 30px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    font-weight:600;
+
+}
+
+.watch-btn{
+
+    background:#00d4ff;
+
+    color:black;
+
+}
+
+.watchlist-btn{
+
+    background:#111827;
+
+    color:white;
+
+}
+
+.watch-btn:hover,
+.watchlist-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+@media(max-width:900px){
+
+    .details-overlay{
+
+        flex-direction:column;
+
+        text-align:center;
+
+        padding-top:120px;
+
+    }
+
+    .poster{
+
+        width:260px;
+
+    }
+
+    .info h1{
+
+        font-size:2.5rem;
+
+    }
+
+    #genres{
+
+        justify-content:center;
+
+    }
+
+    .actions{
+
+        justify-content:center;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<button
+class="back-btn"
+onclick="history.back()"
+>
+← Back
+</button>
+
+<div
+id="detailsPage"
+class="details-backdrop"
+>
+
+<div class="details-overlay">
+
+<img
+id="poster"
+class="poster"
+>
+
+<div class="info">
+
+<h1 id="title"></h1>
+
+<div
+id="meta"
+class="meta"
+></div>
+
+<p id="overview"></p>
+
+<div id="genres"></div>
+
+<div class="actions">
+
+<button
+id="watchNow"
+class="watch-btn"
+>
+▶ Watch Now
+</button>
+
+<button
+id="watchlistBtn"
+class="watchlist-btn"
+>
+＋ Watchlist
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="js/tmdb.js"></script>
+<script src="js/details.js"></script>
+
+</body>
+</html>
