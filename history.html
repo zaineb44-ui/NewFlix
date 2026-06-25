@@ -1,65 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>Continue Watching</title>
-
-<link rel="stylesheet" href="css/main.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewFlix – Continue Watching</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2300d4ff'/><polygon points='35,25 75,50 35,75' fill='white'/></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .history-actions { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+    .history-actions button { padding: 10px 24px; border: none; border-radius: 40px; cursor: pointer; font-weight: 500; transition: 0.3s; }
+    .clear-history-btn { background: rgba(255,0,0,0.15); color: #ff6b6b; border: 1px solid rgba(255,0,0,0.1); }
+    .clear-history-btn:hover { background: rgba(255,0,0,0.25); }
+    .empty-history { color: #777; padding: 40px; text-align: center; }
+  </style>
 </head>
-
 <body>
+  <header class="header">
+    <div class="logo"><i class="fas fa-film"></i> NEWFLIX</div>
+    <nav>
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="watchlist.html"><i class="fas fa-bookmark"></i> Watchlist</a>
+      <a href="history.html" class="active"><i class="fas fa-clock"></i> Continue</a>
+    </nav>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search…">
+    </div>
+  </header>
 
-<header class="header">
+  <main style="padding-top:100px;">
+    <h1 style="margin-bottom:30px;"><i class="fas fa-clock" style="color:#00d4ff;"></i> Continue Watching</h1>
+    <div class="history-actions">
+      <button id="clearHistoryBtn" class="clear-history-btn"><i class="fas fa-trash"></i> Clear History</button>
+    </div>
+    <div id="continueCard"></div>
+  </main>
 
-<div class="logo">
+  <!-- Footer -->
+  <footer style="margin-top:60px; padding:30px 20px; text-align:center; background:rgba(255,255,255,0.03); border-top:1px solid rgba(255,255,255,0.06); color:#aaa; font-family:'Inter', sans-serif;">
+    <div style="margin-bottom:10px; font-weight:600; color:#00d4ff; font-size:1.1rem;">⚠️ Important Notice</div>
+    <div style="max-width:700px; margin:0 auto 15px; font-size:0.9rem; line-height:1.6; opacity:0.8;">NewFlix does not host or store any media files. All content is sourced from third‑party services and platforms. We respect intellectual property rights and comply with DMCA regulations.</div>
+    <div style="font-size:0.85rem; opacity:0.6;">© <span id="current-year"></span> NewFlix. All rights reserved. &nbsp;|&nbsp; Made with ❤️ for movie lovers &nbsp;|&nbsp; Version 2.0</div>
+    <div id="datetime" style="font-size:0.8rem; margin-top:6px; opacity:0.5;"></div>
+  </footer>
 
-StreamFlix
+  <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    function updateDateTime() { document.getElementById('datetime').textContent = new Date().toLocaleString(); }
+    updateDateTime(); setInterval(updateDateTime, 1000);
+  </script>
 
-</div>
-
-<nav>
-
-<a href="index.html">
-Home
-</a>
-
-<a href="watchlist.html">
-Watchlist
-</a>
-
-<a href="history.html">
-Continue
-</a>
-
-</nav>
-
-<div class="search-box">
-
-<input
-type="text"
-id="searchInput"
-placeholder="Search..."
->
-
-</div>
-
-</header>
-
-<main style="padding-top:100px;">
-
-<h1>
-Continue Watching
-</h1>
-
-<br>
-
-<div id="continueCard"></div>
-
-</main>
-
-<script src="js/tmdb.js"></script>
-<script src="js/history.js"></script>
-
+  <script src="js/tmdb.js"></script>
+  <script src="js/history.js"></script>
 </body>
 </html>

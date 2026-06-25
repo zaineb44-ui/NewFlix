@@ -1,278 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Details</title>
-
-<link rel="stylesheet" href="css/main.css">
-
-<style>
-
-.back-btn{
-    position:fixed;
-    top:20px;
-    left:20px;
-    z-index:9999;
-
-    padding:12px 20px;
-
-    border:none;
-    border-radius:12px;
-
-    background:#00d4ff;
-    color:black;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.3s;
-}
-
-.back-btn:hover{
-    transform:translateY(-2px);
-}
-
-.details-backdrop{
-    min-height:100vh;
-    background-size:cover;
-    background-position:center;
-}
-
-.details-overlay{
-
-    min-height:100vh;
-
-    background:linear-gradient(
-        to right,
-        rgba(0,0,0,.95),
-        rgba(0,0,0,.65)
-    );
-
-    display:flex;
-    align-items:center;
-    gap:40px;
-
-    padding:60px;
-}
-
-.poster{
-
-    width:320px;
-
-    border-radius:20px;
-
-    box-shadow:
-    0 10px 40px rgba(0,0,0,.5);
-
-}
-
-.info{
-
-    max-width:700px;
-
-}
-
-.info h1{
-
-    font-size:4rem;
-
-    margin-bottom:15px;
-
-}
-
-.info p{
-
-    line-height:1.8;
-
-    margin-bottom:20px;
-
-}
-
-.meta{
-
-    margin-bottom:25px;
-
-    color:#ccc;
-
-    font-size:18px;
-
-}
-
-#genres{
-
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-
-}
-
-#genres span{
-
-    background:#111827;
-
-    padding:8px 15px;
-
-    border-radius:999px;
-
-    font-size:14px;
-
-}
-
-.actions{
-
-    display:flex;
-
-    gap:15px;
-
-    margin-top:20px;
-
-}
-
-.actions button{
-
-    padding:14px 30px;
-
-    border:none;
-
-    border-radius:12px;
-
-    cursor:pointer;
-
-    font-size:16px;
-
-    font-weight:600;
-
-}
-
-.watch-btn{
-
-    background:#00d4ff;
-
-    color:black;
-
-}
-
-.watchlist-btn{
-
-    background:#111827;
-
-    color:white;
-
-}
-
-.watch-btn:hover,
-.watchlist-btn:hover{
-
-    transform:translateY(-2px);
-
-}
-
-@media(max-width:900px){
-
-    .details-overlay{
-
-        flex-direction:column;
-
-        text-align:center;
-
-        padding-top:120px;
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewFlix – Details</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2300d4ff'/><polygon points='35,25 75,50 35,75' fill='white'/></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .back-btn {
+      position: fixed; top: 20px; left: 20px; z-index: 9999;
+      padding: 12px 24px; border: none; border-radius: 40px;
+      background: rgba(0, 212, 255, 0.15);
+      backdrop-filter: blur(12px);
+      color: #fff; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s;
     }
+    .back-btn:hover { background: rgba(0, 212, 255, 0.3); transform: translateY(-2px); }
 
-    .poster{
-
-        width:260px;
-
+    .details-backdrop {
+      min-height: 100vh;
+      background-size: cover; background-position: center;
     }
-
-    .info h1{
-
-        font-size:2.5rem;
-
+    .details-overlay {
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 100%);
+      display: flex; align-items: center; gap: 50px;
+      padding: 80px 60px;
     }
-
-    #genres{
-
-        justify-content:center;
-
+    .poster {
+      width: 320px;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      transition: transform 0.3s;
     }
+    .poster:hover { transform: scale(1.02); }
+    .info { max-width: 700px; }
+    .info h1 { font-size: 4rem; margin-bottom: 15px; letter-spacing: -1px; }
+    .info p { line-height: 1.8; opacity: 0.9; margin-bottom: 20px; }
+    .meta { display: flex; gap: 20px; margin-bottom: 25px; color: #aaa; font-size: 1rem; }
+    .meta span { background: rgba(255,255,255,0.06); padding: 6px 16px; border-radius: 40px; }
+    #genres { display: flex; flex-wrap: wrap; gap: 10px; }
+    #genres span { background: rgba(0, 212, 255, 0.15); padding: 8px 18px; border-radius: 40px; font-size: 0.9rem; backdrop-filter: blur(4px); }
+    .actions { display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
+    .actions button { padding: 14px 32px; border: none; border-radius: 40px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+    .watch-btn { background: #00d4ff; color: #000; }
+    .watch-btn:hover { box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); transform: translateY(-3px); }
+    .watchlist-btn { background: rgba(255,255,255,0.08); color: #fff; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+    .watchlist-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-3px); }
+    .watchlist-btn.in-watchlist { background: rgba(0, 212, 255, 0.2); border-color: #00d4ff; }
 
-    .actions{
-
-        justify-content:center;
-
+    @media (max-width: 900px) {
+      .details-overlay { flex-direction: column; text-align: center; padding: 120px 30px 60px; }
+      .poster { width: 220px; }
+      .info h1 { font-size: 2.5rem; }
+      .meta { justify-content: center; flex-wrap: wrap; }
+      #genres { justify-content: center; }
+      .actions { justify-content: center; }
     }
-
-}
-
-</style>
-
+  </style>
 </head>
-
 <body>
+  <!-- Fixed header (copied from index) -->
+  <header class="header" style="position:fixed; top:0; width:100%; z-index:999; display:flex; justify-content:space-between; align-items:center; padding:16px 40px; background:rgba(10,10,15,0.75); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.04);">
+    <div class="logo"><i class="fas fa-film"></i> NEWFLIX</div>
+    <nav>
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="watchlist.html"><i class="fas fa-bookmark"></i> Watchlist</a>
+      <a href="history.html"><i class="fas fa-clock"></i> Continue</a>
+    </nav>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search…">
+    </div>
+  </header>
 
-<button
-class="back-btn"
-onclick="history.back()"
->
-← Back
-</button>
+  <button class="back-btn" onclick="history.back()" style="margin-top:80px;"><i class="fas fa-arrow-left"></i> Back</button>
 
-<div
-id="detailsPage"
-class="details-backdrop"
->
+  <div id="detailsPage" class="details-backdrop">
+    <div class="details-overlay">
+      <img id="poster" class="poster" alt="Poster">
+      <div class="info">
+        <h1 id="title"></h1>
+        <div id="meta" class="meta"></div>
+        <p id="overview"></p>
+        <div id="genres"></div>
+        <div class="actions">
+          <button id="watchNow" class="watch-btn"><i class="fas fa-play"></i> Watch Now</button>
+          <button id="watchlistBtn" class="watchlist-btn"><i class="fas fa-plus"></i> Watchlist</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div class="details-overlay">
+  <!-- Footer -->
+  <footer style="margin-top:0; padding:30px 20px; text-align:center; background:rgba(255,255,255,0.03); border-top:1px solid rgba(255,255,255,0.06); color:#aaa; font-family:'Inter', sans-serif;">
+    <div style="margin-bottom:10px; font-weight:600; color:#00d4ff; font-size:1.1rem;">⚠️ Important Notice</div>
+    <div style="max-width:700px; margin:0 auto 15px; font-size:0.9rem; line-height:1.6; opacity:0.8;">NewFlix does not host or store any media files. All content is sourced from third‑party services and platforms. We respect intellectual property rights and comply with DMCA regulations.</div>
+    <div style="font-size:0.85rem; opacity:0.6;">© <span id="current-year"></span> NewFlix. All rights reserved. &nbsp;|&nbsp; Made with ❤️ for movie lovers &nbsp;|&nbsp; Version 2.0</div>
+    <div id="datetime" style="font-size:0.8rem; margin-top:6px; opacity:0.5;"></div>
+  </footer>
 
-<img
-id="poster"
-class="poster"
->
+  <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    function updateDateTime() { document.getElementById('datetime').textContent = new Date().toLocaleString(); }
+    updateDateTime(); setInterval(updateDateTime, 1000);
+  </script>
 
-<div class="info">
-
-<h1 id="title"></h1>
-
-<div
-id="meta"
-class="meta"
-></div>
-
-<p id="overview"></p>
-
-<div id="genres"></div>
-
-<div class="actions">
-
-<button
-id="watchNow"
-class="watch-btn"
->
-▶ Watch Now
-</button>
-
-<button
-id="watchlistBtn"
-class="watchlist-btn"
->
-＋ Watchlist
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<script src="js/tmdb.js"></script>
-<script src="js/details.js"></script>
-
+  <script src="js/tmdb.js"></script>
+  <script src="js/details.js"></script>
 </body>
 </html>

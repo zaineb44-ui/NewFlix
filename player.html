@@ -1,199 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewFlix Player</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2300d4ff'/><polygon points='35,25 75,50 35,75' fill='white'/></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    body { background: #0a0a0f; }
+    .player-page { padding: 20px 30px; max-width: 1400px; margin: 0 auto; }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .nav-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 40px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    .info-box { margin-bottom: 25px; }
+    .info-box h1 { font-size: 2.2rem; margin-bottom: 8px; }
+    .info-box p { opacity: 0.7; }
 
-<title>StreamFlix Player</title>
+    .source-selector { display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap; align-items: center; }
+    .source-btn { padding: 10px 24px; border: 1px solid rgba(255,255,255,0.08); border-radius: 40px; background: rgba(255,255,255,0.04); color: #aaa; cursor: pointer; font-weight: 500; transition: 0.3s; }
+    .source-btn.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+    .source-btn:hover { background: rgba(255,255,255,0.1); }
+    #sourceStatus { margin-left: 15px; font-size: 0.85rem; opacity: 0.6; word-break: break-all; }
 
-<link rel="stylesheet" href="css/main.css">
+    .player-container { width: 100%; margin-bottom: 30px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+    #player { width: 100%; height: 75vh; border: none; background: #000; }
 
-<style>
+    .selector-section { margin-top: 25px; }
+    .selector-title { font-size: 1.1rem; margin-bottom: 12px; opacity: 0.8; }
+    .selector-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+    .selector-buttons button { padding: 10px 20px; border: 1px solid rgba(255,255,255,0.06); border-radius: 40px; background: rgba(255,255,255,0.04); color: #ccc; cursor: pointer; transition: 0.3s; }
+    .selector-buttons button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+    .selector-buttons button:hover { background: rgba(255,255,255,0.12); }
 
-body{
-    background:#000;
-}
-
-.player-page{
-    padding:20px;
-}
-
-.player-header{
-    margin-bottom:20px;
-}
-
-.player-title{
-    font-size:2rem;
-    margin-bottom:10px;
-}
-
-.source-selector{
-    display:flex;
-    gap:10px;
-    margin:20px 0;
-}
-
-.source-btn{
-    padding:12px 24px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    background:#111827;
-    color:white;
-    font-weight:bold;
-}
-
-.source-btn.active{
-    background:#00d4ff;
-    color:black;
-}
-
-.player-container{
-    width:100%;
-    margin-bottom:30px;
-}
-
-#player{
-    width:100%;
-    height:75vh;
-    border:none;
-    border-radius:20px;
-    background:black;
-}
-
-.selector-section{
-    margin-top:25px;
-}
-
-.selector-title{
-    margin-bottom:10px;
-}
-
-.selector-buttons{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.selector-buttons button{
-    padding:10px 18px;
-    border:none;
-    border-radius:10px;
-    background:#111827;
-    color:white;
-    cursor:pointer;
-}
-
-.selector-buttons button.active{
-    background:#00d4ff;
-    color:black;
-}
-
-.back-btn{
-    margin-bottom:20px;
-    padding:12px 20px;
-    border:none;
-    border-radius:10px;
-    background:#00d4ff;
-    cursor:pointer;
-}
-
-.info-box{
-    margin-bottom:20px;
-}
-
-</style>
-
+    @media (max-width: 700px) {
+      .player-page { padding: 15px; }
+      #player { height: 50vh; }
+      .info-box h1 { font-size: 1.6rem; }
+      .nav-buttons { flex-wrap: wrap; }
+    }
+  </style>
 </head>
-
 <body>
+  <header class="header">
+    <div class="logo"><i class="fas fa-film"></i> NEWFLIX</div>
+    <nav>
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="watchlist.html"><i class="fas fa-bookmark"></i> Watchlist</a>
+      <a href="history.html"><i class="fas fa-clock"></i> Continue</a>
+    </nav>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search…">
+    </div>
+  </header>
 
-<div class="player-page">
+  <div class="player-page" style="padding-top:100px;">
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="nav-btn" onclick="location.href='index.html'"><i class="fas fa-home"></i> Home</button>
+    </div>
 
-<button
-class="back-btn"
-onclick="history.back()"
->
-← Back
-</button>
+    <div class="info-box">
+      <h1 id="mediaTitle"></h1>
+      <p id="mediaOverview"></p>
+    </div>
 
-<div class="info-box">
+    <div class="source-selector">
+      <button class="source-btn active" data-source="vidfast">VidFast</button>
+      <button class="source-btn" data-source="streamrip">Streamrip</button>
+      <div id="sourceStatus"></div>
+    </div>
 
-<h1
-id="mediaTitle"
-class="player-title"
-></h1>
+    <div class="player-container">
+      <iframe id="player" allowfullscreen></iframe>
+    </div>
 
-<p id="mediaOverview"></p>
+    <div id="seasonSection" class="selector-section" style="display:none;">
+      <h3 class="selector-title">Seasons</h3>
+      <div id="seasonButtons" class="selector-buttons"></div>
+    </div>
+    <div id="episodeSection" class="selector-section" style="display:none;">
+      <h3 class="selector-title">Episodes</h3>
+      <div id="episodeButtons" class="selector-buttons"></div>
+    </div>
 
-</div>
+    <!-- Footer -->
+    <footer style="margin-top:60px; padding:30px 20px; text-align:center; background:rgba(255,255,255,0.03); border-top:1px solid rgba(255,255,255,0.06); color:#aaa; font-family:'Inter', sans-serif;">
+      <div style="margin-bottom:10px; font-weight:600; color:#00d4ff; font-size:1.1rem;">⚠️ Important Notice</div>
+      <div style="max-width:700px; margin:0 auto 15px; font-size:0.9rem; line-height:1.6; opacity:0.8;">NewFlix does not host or store any media files. All content is sourced from third‑party services and platforms. We respect intellectual property rights and comply with DMCA regulations.</div>
+      <div style="font-size:0.85rem; opacity:0.6;">© <span id="current-year"></span> NewFlix. All rights reserved. &nbsp;|&nbsp; Made with ❤️ for movie lovers &nbsp;|&nbsp; Version 2.0</div>
+      <div id="datetime" style="font-size:0.8rem; margin-top:6px; opacity:0.5;"></div>
+    </footer>
+    <script>
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+      function updateDateTime() { document.getElementById('datetime').textContent = new Date().toLocaleString(); }
+      updateDateTime(); setInterval(updateDateTime, 1000);
+    </script>
+  </div>
 
-<div class="source-selector">
-
-<button
-class="source-btn active"
-data-source="vidfast"
->
-VidFast
-</button>
-
-<button
-class="source-btn"
-data-source="streamrip"
->
-Streamrip
-</button>
-
-</div>
-
-<div class="player-container">
-
-<iframe
-id="player"
-allowfullscreen
-></iframe>
-
-</div>
-
-<div
-id="seasonSection"
-class="selector-section"
-style="display:none;"
->
-
-<h3 class="selector-title">
-Seasons
-</h3>
-
-<div
-id="seasonButtons"
-class="selector-buttons"
-></div>
-
-</div>
-
-<div
-id="episodeSection"
-class="selector-section"
-style="display:none;"
->
-
-<h3 class="selector-title">
-Episodes
-</h3>
-
-<div
-id="episodeButtons"
-class="selector-buttons"
-></div>
-
-</div>
-
-</div>
-
-<script src="js/tmdb.js"></script>
-<script src="js/player.js"></script>
-
+  <script src="js/tmdb.js"></script>
+  <script src="js/player.js"></script>
 </body>
 </html>
