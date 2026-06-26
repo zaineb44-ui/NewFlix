@@ -12,6 +12,7 @@
     body { background: #0a0a0f; }
     .player-page { padding: 20px 30px; max-width: 1400px; margin: 0 auto; }
 
+    /* Navigation */
     .nav-buttons {
       display: flex;
       gap: 12px;
@@ -36,11 +37,20 @@
       background: rgba(255,255,255,0.15);
       transform: translateY(-2px);
     }
-    .info-box { margin-bottom: 25px; }
+
+    /* Info */
+    .info-box { margin-bottom: 20px; }
     .info-box h1 { font-size: 2.2rem; margin-bottom: 8px; }
     .info-box p { opacity: 0.7; }
 
-    .source-selector { display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap; align-items: center; }
+    /* Source selector */
+    .source-selector {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 10px;
+    }
     .source-btn {
       padding: 10px 24px;
       border: 1px solid rgba(255,255,255,0.08);
@@ -53,34 +63,107 @@
     }
     .source-btn.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
     .source-btn:hover { background: rgba(255,255,255,0.1); }
-    #sourceStatus { margin-left: 15px; font-size: 0.85rem; opacity: 0.6; word-break: break-all; }
 
-    .player-container { width: 100%; margin-bottom: 30px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-    #player { width: 100%; height: 75vh; border: none; background: #000; }
+    .source-message {
+      width: 100%;
+      font-size: 0.9rem;
+      color: #aaa;
+      background: rgba(255,255,255,0.03);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border-left: 3px solid #00d4ff;
+      margin: 5px 0 15px 0;
+    }
+    .source-message i { margin-right: 8px; color: #00d4ff; }
 
-    .selector-section { margin-top: 25px; }
-    .selector-title { font-size: 1.1rem; margin-bottom: 12px; opacity: 0.8; }
-    .selector-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-    .selector-buttons button { padding: 10px 20px; border: 1px solid rgba(255,255,255,0.06); border-radius: 40px; background: rgba(255,255,255,0.04); color: #ccc; cursor: pointer; transition: 0.3s; }
-    .selector-buttons button.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
-    .selector-buttons button:hover { background: rgba(255,255,255,0.12); }
+    /* Season & Episode selectors - moved to top */
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 15px 0 20px 0;
+      background: rgba(255,255,255,0.02);
+      padding: 15px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .selector-section {
+      flex: 1;
+      min-width: 200px;
+    }
+    .selector-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #aaa;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .selector-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .selector-buttons button {
+      padding: 8px 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 40px;
+      background: rgba(255,255,255,0.04);
+      color: #ccc;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 0.9rem;
+      min-width: 44px;
+      text-align: center;
+    }
+    .selector-buttons button.active {
+      background: #00d4ff;
+      color: #000;
+      border-color: #00d4ff;
+      font-weight: 600;
+    }
+    .selector-buttons button:hover {
+      background: rgba(255,255,255,0.12);
+    }
+    .selector-buttons button.active:hover {
+      background: #00d4ff;
+    }
 
+    /* Player */
+    .player-container {
+      width: 100%;
+      margin-bottom: 30px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    #player {
+      width: 100%;
+      height: 75vh;
+      border: none;
+      background: #000;
+    }
+
+    /* Responsive */
     @media (max-width: 700px) {
       .player-page { padding: 15px; }
       #player { height: 50vh; }
       .info-box h1 { font-size: 1.6rem; }
       .nav-buttons { flex-wrap: wrap; }
+      .controls-row { flex-direction: column; gap: 15px; }
     }
   </style>
 </head>
 <body>
   <header class="header">
     <div class="logo"><i class="fas fa-film"></i> NEWFLIX</div>
-    <nav>
-      <a href="index.html"><i class="fas fa-home"></i> Home</a>
-      <a href="watchlist.html"><i class="fas fa-bookmark"></i> Watchlist</a>
-      <a href="history.html"><i class="fas fa-clock"></i> Continue</a>
-    </nav>
+<nav>
+  <a href="index.html"><i class="fas fa-home"></i> Home</a>
+  <a href="movies.html"><i class="fas fa-film"></i> Movies</a>
+  <a href="series.html"><i class="fas fa-tv"></i> Series</a>
+  <a href="watchlist.html"><i class="fas fa-bookmark"></i> Watchlist</a>
+  <a href="history.html"><i class="fas fa-clock"></i> Continue</a>
+</nav>
     <div class="search-box">
       <i class="fas fa-search"></i>
       <input type="text" id="searchInput" placeholder="Search…">
@@ -88,16 +171,19 @@
   </header>
 
   <div class="player-page" style="padding-top:100px;">
+    <!-- Navigation -->
     <div class="nav-buttons">
       <button class="nav-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i> Back</button>
       <button class="nav-btn" onclick="location.href='index.html'"><i class="fas fa-home"></i> Home</button>
     </div>
 
+    <!-- Info -->
     <div class="info-box">
       <h1 id="mediaTitle"></h1>
       <p id="mediaOverview"></p>
     </div>
 
+    <!-- Source selector with message -->
     <div class="source-selector">
       <button class="source-btn active" data-source="vidfast">VidFast</button>
       <button class="source-btn" data-source="streamrip">Streamrip</button>
@@ -105,18 +191,26 @@
       <button class="source-btn" data-source="multiembed">MultiEmbed</button>
       <div id="sourceStatus"></div>
     </div>
+    <div class="source-message">
+      <i class="fas fa-info-circle"></i>
+      If the video doesn't play, try switching the source above.
+    </div>
 
+    <!-- Season & Episode controls (moved to top) -->
+    <div id="controlsWrapper" class="controls-row" style="display:none;">
+      <div id="seasonSection" class="selector-section">
+        <div class="selector-title"><i class="fas fa-layer-group"></i> Season</div>
+        <div id="seasonButtons" class="selector-buttons"></div>
+      </div>
+      <div id="episodeSection" class="selector-section" style="display:none;">
+        <div class="selector-title"><i class="fas fa-list"></i> Episode</div>
+        <div id="episodeButtons" class="selector-buttons"></div>
+      </div>
+    </div>
+
+    <!-- Player -->
     <div class="player-container">
       <iframe id="player" allowfullscreen></iframe>
-    </div>
-
-    <div id="seasonSection" class="selector-section" style="display:none;">
-      <h3 class="selector-title">Seasons</h3>
-      <div id="seasonButtons" class="selector-buttons"></div>
-    </div>
-    <div id="episodeSection" class="selector-section" style="display:none;">
-      <h3 class="selector-title">Episodes</h3>
-      <div id="episodeButtons" class="selector-buttons"></div>
     </div>
 
     <!-- Footer -->

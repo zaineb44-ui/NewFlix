@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewFlix – Movies</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2300d4ff'/><polygon points='35,25 75,50 35,75' fill='white'/></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 20px 0 10px;
+    }
+    .page-title i { color: #00d4ff; margin-right: 12px; }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px 0 30px;
+      background: rgba(255,255,255,0.03);
+      padding: 15px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      align-items: center;
+    }
+    .filters label {
+      font-weight: 500;
+      color: #aaa;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filters select {
+      padding: 10px 16px;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      outline: none;
+      transition: 0.3s;
+      min-width: 150px;
+    }
+    .filters select:focus {
+      border-color: #00d4ff;
+      background: rgba(255,255,255,0.08);
+    }
+    .filters select option {
+      background: #1a1a2e;
+      color: #fff;
+    }
+    .filters .reset-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 40px;
+      background: rgba(255,255,255,0.06);
+      color: #aaa;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 500;
+    }
+    .filters .reset-btn:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 25px;
+      padding: 20px 0;
+    }
+    .page-grid .card {
+      width: 100%;
+      min-width: unset;
+    }
+    .load-more-btn {
+      display: block;
+      margin: 40px auto;
+      padding: 14px 40px;
+      border: none;
+      border-radius: 40px;
+      background: rgba(0,212,255,0.15);
+      color: #00d4ff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid rgba(0,212,255,0.2);
+    }
+    .load-more-btn:hover {
+      background: rgba(0,212,255,0.25);
+      transform: scale(1.02);
+    }
+    .load-more-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .empty-message {
+      padding: 60px 20px;
+      text-align: center;
+      color: #777;
+      font-size: 1.2rem;
+    }
+    .empty-message i { font-size: 3rem; display: block; margin-bottom: 20px; color: #444; }
+
+    @media (max-width: 700px) {
+      .filters { flex-direction: column; align-items: stretch; }
+      .filters select { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo"><i class="fas fa-film"></i> NEWFLIX</div>
+    <nav>
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="movies.html" class="active"><i class="fas fa-film"></i> Movies</a>
+      <a href="series.html"><i class="fas fa-tv"></i> Series</a>
+      <a href="watchlist.html"><i class="fas fa-bookmark"></i> Watchlist</a>
+      <a href="history.html"><i class="fas fa-clock"></i> Continue</a>
+    </nav>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search…">
+    </div>
+  </header>
+
+  <main style="padding-top:100px;">
+    <h1 class="page-title"><i class="fas fa-film"></i> Movies</h1>
+
+    <!-- Filters -->
+    <div class="filters">
+      <label>
+        <i class="fas fa-tags"></i> Genre
+        <select id="genreFilter">
+          <option value="">All Genres</option>
+        </select>
+      </label>
+      <label>
+        <i class="fas fa-calendar-alt"></i> Year
+        <select id="yearFilter">
+          <option value="">All Years</option>
+        </select>
+      </label>
+      <button class="reset-btn" id="resetFiltersBtn"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+
+    <div id="movieGrid" class="page-grid"></div>
+    <button id="loadMoreBtn" class="load-more-btn">Load More</button>
+  </main>
+
+  <footer style="margin-top:60px; padding:30px 20px; text-align:center; background:rgba(255,255,255,0.03); border-top:1px solid rgba(255,255,255,0.06); color:#aaa; font-family:'Inter', sans-serif;">
+    <div style="margin-bottom:10px; font-weight:600; color:#00d4ff; font-size:1.1rem;">⚠️ Important Notice</div>
+    <div style="max-width:700px; margin:0 auto 15px; font-size:0.9rem; line-height:1.6; opacity:0.8;">NewFlix does not host or store any media files. All content is sourced from third‑party services and platforms. We respect intellectual property rights and comply with DMCA regulations.</div>
+    <div style="font-size:0.85rem; opacity:0.6;">© <span id="current-year"></span> NewFlix. All rights reserved. &nbsp;|&nbsp; Made with ❤️ for movie lovers &nbsp;|&nbsp; Version 2.0</div>
+    <div id="datetime" style="font-size:0.8rem; margin-top:6px; opacity:0.5;"></div>
+  </footer>
+
+  <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    function updateDateTime() { document.getElementById('datetime').textContent = new Date().toLocaleString(); }
+    updateDateTime(); setInterval(updateDateTime, 1000);
+  </script>
+
+  <script src="js/tmdb.js"></script>
+  <script src="js/movies.js"></script>
+</body>
+</html>
