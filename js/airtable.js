@@ -3,7 +3,7 @@ const AIRTABLE_BASE = 'apphFKUZi8st0hHTE';
 const AIRTABLE_TOKEN = 'patwtpgmgRGDxBdkF.45c1aa777f615bd961be32fe2661fbe8982e2c003c871fa00339ad9c44b9161a';
 
 // Table IDs (optional – you can use table names instead)
-const TABLE_USERS = 'tbltHYY72Qi7kvLU0';
+const TABLE_USERS = 'Users';
 const TABLE_WATCHLIST = 'tblIyXDc0Z8AaY6tm';
 const TABLE_CONTINUE = 'tblcTM8OeLgNpnDMJ';
 
