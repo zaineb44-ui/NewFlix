@@ -10,91 +10,87 @@ const trailerIframe = document.getElementById("trailerIframe");
 const closeTrailer = document.getElementById("closeTrailer");
 const youtubeFallbackLink = document.getElementById("youtubeFallbackLink");
 
-// ── Helpers ──
-function getWatchlist() {
-  return JSON.parse(localStorage.getItem("watchlist")) || [];
-}
-function saveWatchlist(list) {
-  localStorage.setItem("watchlist", JSON.stringify(list));
-}
-function getContinueList() {
-  return JSON.parse(localStorage.getItem('continueWatchingList')) || [];
-}
-function saveContinueList(list) {
-  localStorage.setItem('continueWatchingList', JSON.stringify(list));
+// ── Helpers (now with Airtable) ──
+async function isInWatchlist(userId, tmdbId, type) {
+  try {
+    const records = await getWatchlist(userId);
+    return records.some(r => r.fields.TmdbId === String(tmdbId) && r.fields.Type === type);
+  } catch { return false; }
 }
 
-function isInWatchlist() {
-  return getWatchlist().some(item => item.id == id && item.type === type);
-}
-function isInContinue() {
-  return getContinueList().some(item => item.id == id && item.type === type);
+async function isInContinue(userId, tmdbId, type) {
+  try {
+    const records = await getContinueWatching(userId);
+    return records.some(r => r.fields.TmdbId === String(tmdbId) && r.fields.Type === type);
+  } catch { return false; }
 }
 
-function updateWatchlistButton() {
-  if (isInWatchlist()) {
+async function updateWatchlistButton() {
+  const user = getSession();
+  if (!user) {
+    watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Watchlist';
+    watchlistBtn.classList.remove('in-watchlist');
+    return;
+  }
+  const inList = await isInWatchlist(user.id, id, type);
+  if (inList) {
     watchlistBtn.innerHTML = '<i class="fas fa-check"></i> In Watchlist';
-    watchlistBtn.classList.add("in-watchlist");
+    watchlistBtn.classList.add('in-watchlist');
   } else {
     watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Watchlist';
-    watchlistBtn.classList.remove("in-watchlist");
+    watchlistBtn.classList.remove('in-watchlist');
   }
 }
-function updateWatchNowButton() {
-  if (isInContinue()) {
+
+async function updateWatchNowButton() {
+  const user = getSession();
+  if (!user) {
+    watchNowBtn.innerHTML = '<i class="fas fa-play"></i> Watch Now';
+    return;
+  }
+  const inCont = await isInContinue(user.id, id, type);
+  if (inCont) {
     watchNowBtn.innerHTML = '<i class="fas fa-play"></i> Continue Watching';
   } else {
     watchNowBtn.innerHTML = '<i class="fas fa-play"></i> Watch Now';
   }
 }
 
-function toggleWatchlist() {
-  let list = getWatchlist();
-  const idx = list.findIndex(item => item.id == id && item.type === type);
-  if (idx > -1) {
-    list.splice(idx, 1);
-    saveWatchlist(list);
-    alert("Removed from watchlist");
-  } else {
-    list.push({ id, type });
-    saveWatchlist(list);
-    alert("Added to watchlist");
+async function toggleWatchlist() {
+  const user = getSession();
+  if (!user) {
+    alert('Please sign in to manage your watchlist.');
+    return;
   }
-  updateWatchlistButton();
+  try {
+    const inList = await isInWatchlist(user.id, id, type);
+    if (inList) {
+      // Find record and delete
+      const records = await getWatchlist(user.id);
+      const found = records.find(r => r.fields.TmdbId === String(id) && r.fields.Type === type);
+      if (found) {
+        await deleteWatchlist(found.id);
+        alert('Removed from watchlist');
+      }
+    } else {
+      await addWatchlist(user.id, id, type);
+      alert('Added to watchlist');
+    }
+    await updateWatchlistButton();
+  } catch (e) {
+    console.error(e);
+    alert('Error updating watchlist. Please try again.');
+  }
 }
 
-// ── Rating badge & Parental Guidance data ──
+// ── Rating badge & Parental Guidance (unchanged) ──
 const ratingData = {
-  'G': {
-    css: 'g',
-    desc: 'Suitable for all ages. No objectionable content.',
-    tags: []
-  },
-  'PG': {
-    css: 'pg',
-    desc: 'Parental guidance suggested. May contain mild violence, language, or brief nudity.',
-    tags: ['Mild Violence', 'Mild Language']
-  },
-  'PG-13': {
-    css: 'pg13',
-    desc: 'Parents strongly cautioned. May contain intense violence, strong language, some sexual content, and drug use.',
-    tags: ['Intense Violence', 'Strong Language', 'Some Sexual Content', 'Drug Use']
-  },
-  'R': {
-    css: 'r',
-    desc: 'Restricted – under 17 requires accompanying parent or adult guardian. Contains adult material such as violence, strong language, sexual content, and drug use.',
-    tags: ['Violence', 'Strong Language', 'Sexual Content', 'Drug Use']
-  },
-  'NC-17': {
-    css: 'nc17',
-    desc: 'Adults only. Explicit content.',
-    tags: ['Explicit Violence', 'Explicit Sexual Content', 'Strong Language']
-  },
-  'Unrated': {
-    css: 'unrated',
-    desc: 'No rating available. Viewer discretion advised.',
-    tags: []
-  }
+  'G': { css: 'g', desc: 'Suitable for all ages.', tags: [] },
+  'PG': { css: 'pg', desc: 'Parental guidance suggested.', tags: ['Mild Violence', 'Mild Language'] },
+  'PG-13': { css: 'pg13', desc: 'Parents strongly cautioned.', tags: ['Intense Violence', 'Strong Language', 'Some Sexual Content', 'Drug Use'] },
+  'R': { css: 'r', desc: 'Restricted – under 17 requires adult.', tags: ['Violence', 'Strong Language', 'Sexual Content', 'Drug Use'] },
+  'NC-17': { css: 'nc17', desc: 'Adults only.', tags: ['Explicit Violence', 'Explicit Sexual Content', 'Strong Language'] },
+  'Unrated': { css: 'unrated', desc: 'No rating available.', tags: [] }
 };
 
 function getRatingClass(rating) {
@@ -108,7 +104,6 @@ function getRatingClass(rating) {
   return 'unrated';
 }
 
-// ── Fetch rating (movie or TV) ──
 async function fetchRating() {
   try {
     let rating = null;
@@ -158,31 +153,24 @@ async function fetchRating() {
       pgTags.innerHTML = '<span style="opacity:0.5;">No specific content descriptors</span>';
     }
     pgDiv.style.display = 'block';
-
   } catch (e) {
     console.error('Error fetching rating:', e);
     document.getElementById('parentalGuidance').style.display = 'none';
   }
 }
 
-// ── Fetch trailer (FIXED: youtube-nocookie + referrer is set in HTML) ──
 async function fetchTrailer() {
   try {
     const res = await fetch(`${API_URL}/${type}/${id}/videos?api_key=${API_KEY}`);
     const data = await res.json();
     let video = data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-    if (!video) {
-      video = data.results.find(v => v.type === 'Teaser' && v.site === 'YouTube');
-    }
-    if (!video) {
-      video = data.results.find(v => v.site === 'YouTube');
-    }
+    if (!video) video = data.results.find(v => v.type === 'Teaser' && v.site === 'YouTube');
+    if (!video) video = data.results.find(v => v.site === 'YouTube');
     if (video && video.key) {
       const key = video.key;
       trailerBtn.style.display = 'inline-flex';
       youtubeFallbackLink.href = `https://www.youtube.com/watch?v=${key}`;
       trailerBtn.onclick = () => {
-        // Use youtube-nocookie.com to avoid cookie issues
         trailerIframe.src = `https://www.youtube-nocookie.com/embed/${key}?rel=0&modestbranding=1`;
         trailerModal.classList.add('show');
       };
@@ -213,23 +201,30 @@ async function loadDetails() {
     `;
     document.getElementById("genres").innerHTML = data.genres.map(g => `<span>${g.name}</span>`).join('');
 
-    updateWatchlistButton();
-    updateWatchNowButton();
+    await updateWatchlistButton();
+    await updateWatchNowButton();
 
-    watchNowBtn.onclick = () => {
-      if (!isInContinue()) {
-        let list = getContinueList();
-        const newEntry = {
-          id: id,
-          type: type,
-          season: 1,
-          episode: 1,
-          timestamp: Date.now()
-        };
-        list.push(newEntry);
-        saveContinueList(list);
+    watchNowBtn.onclick = async () => {
+      const user = getSession();
+      if (!user) {
+        alert('Please sign in to save your progress.');
+        window.location.href = 'signin.html';
+        return;
+      }
+      // Add to continue watching in Airtable
+      try {
+        await addContinueWatching(user.id, id, type, 1, 1);
+        // Also update local storage for offline
+        let list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
+        const newEntry = { id: id, type: type, season: 1, episode: 1, timestamp: Date.now() };
+        const existing = list.findIndex(item => item.id == id && item.type === type);
+        if (existing > -1) list[existing] = newEntry;
+        else list.push(newEntry);
+        localStorage.setItem('continueWatchingList', JSON.stringify(list));
         localStorage.setItem('continueWatching', JSON.stringify(newEntry));
-        updateWatchNowButton();
+        await updateWatchNowButton();
+      } catch (e) {
+        console.warn('Could not save to cloud, but continuing.', e);
       }
       location.href = `player.html?id=${id}&type=${type}`;
     };

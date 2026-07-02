@@ -1,21 +1,32 @@
 const container = document.getElementById("watchlistGrid");
 const clearBtn = document.getElementById("clearWatchlistBtn");
 
-function getWatchlist() {
-  return JSON.parse(localStorage.getItem("watchlist")) || [];
-}
-function saveWatchlist(list) {
-  localStorage.setItem("watchlist", JSON.stringify(list));
-}
-
 async function loadWatchlist() {
-  const list = getWatchlist();
+  const user = getSession();
+  let items = [];
+  if (user) {
+    try {
+      const records = await getWatchlist(user.id);
+      items = records.map(r => ({
+        id: parseInt(r.fields.TmdbId),
+        type: r.fields.Type,
+        recordId: r.id
+      }));
+    } catch (e) {
+      console.warn('Could not load watchlist from cloud, using local', e);
+      items = JSON.parse(localStorage.getItem('watchlist')) || [];
+    }
+  } else {
+    items = JSON.parse(localStorage.getItem('watchlist')) || [];
+  }
+
   container.innerHTML = '';
-  if (list.length === 0) {
+  if (items.length === 0) {
     container.innerHTML = `<p class="watchlist-empty">Your watchlist is empty.</p>`;
     return;
   }
-  for (const item of list) {
+
+  for (const item of items) {
     try {
       const res = await fetch(`${API_URL}/${item.type}/${item.id}?api_key=${API_KEY}`);
       const data = await res.json();
@@ -38,11 +49,25 @@ async function loadWatchlist() {
       delBtn.style.fontSize = "16px";
       delBtn.style.cursor = "pointer";
       delBtn.style.zIndex = "5";
-      delBtn.onclick = (e) => {
+      delBtn.onclick = async (e) => {
         e.stopPropagation();
         if (confirm(`Remove "${data.title || data.name}" from watchlist?`)) {
-          const updated = getWatchlist().filter(w => !(w.id == item.id && w.type === item.type));
-          saveWatchlist(updated);
+          if (user) {
+            try {
+              // Find record ID if we have it
+              if (item.recordId) {
+                await deleteWatchlist(item.recordId);
+              } else {
+                const records = await getWatchlist(user.id);
+                const found = records.find(r => r.fields.TmdbId === String(item.id) && r.fields.Type === item.type);
+                if (found) await deleteWatchlist(found.id);
+              }
+            } catch (e) { console.warn('Could not delete from cloud', e); }
+          }
+          // Update local
+          let local = JSON.parse(localStorage.getItem('watchlist')) || [];
+          local = local.filter(w => !(w.id == item.id && w.type === item.type));
+          localStorage.setItem('watchlist', JSON.stringify(local));
           loadWatchlist();
         }
       };
@@ -66,9 +91,18 @@ async function loadWatchlist() {
   }
 }
 
-clearBtn.addEventListener("click", () => {
+clearBtn.addEventListener("click", async () => {
   if (confirm("Remove all items from watchlist?")) {
-    saveWatchlist([]);
+    const user = getSession();
+    if (user) {
+      try {
+        const records = await getWatchlist(user.id);
+        for (const rec of records) {
+          await deleteWatchlist(rec.id);
+        }
+      } catch (e) { console.warn('Could not clear cloud watchlist', e); }
+    }
+    localStorage.setItem('watchlist', JSON.stringify([]));
     loadWatchlist();
   }
 });

@@ -28,10 +28,8 @@ window.createCard = createCard;
 async function loadHeroCarousel() {
   try {
     const data = await getTrending();
-    // Take first 6 items
     slidesData = data.results.slice(0, 6);
 
-    // Build carousel HTML
     const carouselHTML = `
       <div class="carousel-container">
         <div class="carousel-slides" id="carouselSlides">
@@ -48,11 +46,9 @@ async function loadHeroCarousel() {
           `).join('')}
         </div>
 
-        <!-- Navigation arrows -->
         <button class="carousel-arrow left" id="carouselPrev"><i class="fas fa-chevron-left"></i></button>
         <button class="carousel-arrow right" id="carouselNext"><i class="fas fa-chevron-right"></i></button>
 
-        <!-- Dots -->
         <div class="carousel-dots" id="carouselDots">
           ${slidesData.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`).join('')}
         </div>
@@ -61,7 +57,6 @@ async function loadHeroCarousel() {
 
     hero.innerHTML = carouselHTML;
 
-    // Add event listeners to buttons
     document.querySelectorAll('.carousel-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -71,7 +66,6 @@ async function loadHeroCarousel() {
       });
     });
 
-    // Arrow click events
     document.getElementById('carouselPrev').addEventListener('click', (e) => {
       e.stopPropagation();
       goToSlide(currentSlide - 1);
@@ -83,7 +77,6 @@ async function loadHeroCarousel() {
       resetAutoPlay();
     });
 
-    // Dot click events
     document.querySelectorAll('.dot').forEach(dot => {
       dot.addEventListener('click', (e) => {
         const idx = parseInt(e.target.dataset.index);
@@ -92,17 +85,14 @@ async function loadHeroCarousel() {
       });
     });
 
-    // Pause on hover
     hero.addEventListener('mouseenter', () => clearInterval(carouselInterval));
     hero.addEventListener('mouseleave', startAutoPlay);
 
-    // Initial slide
     goToSlide(0);
     startAutoPlay();
 
   } catch (e) {
     console.error('Error loading carousel:', e);
-    // Fallback: show a static message
     hero.innerHTML = `
       <div class="hero-overlay">
         <h1>Welcome to NewFlix</h1>
@@ -121,12 +111,8 @@ function goToSlide(index) {
   if (index < 0) index = total - 1;
   if (index >= total) index = 0;
   currentSlide = index;
-
-  // Move slides
   const container = document.getElementById('carouselSlides');
   container.style.transform = `translateX(-${index * 100}%)`;
-
-  // Update dots
   dots.forEach((dot, i) => {
     dot.classList.toggle('active', i === index);
   });
@@ -183,19 +169,34 @@ createSections();
 loadHeroCarousel();
 loadRows();
 
-// ─── Continue Watching Row ───
+// ─── Continue Watching Row (modified for Airtable) ───
 async function loadContinueWatchingRow() {
-  let list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
-  if (list.length === 0) {
-    const single = JSON.parse(localStorage.getItem('continueWatching'));
-    if (!single) return;
-    list = [single];
-    localStorage.setItem('continueWatchingList', JSON.stringify(list));
-  }
-
   const main = document.querySelector('main');
   const existing = document.getElementById('continueSection');
   if (existing) existing.remove();
+
+  const user = getSession();
+  let list = [];
+  if (user) {
+    // Fetch from Airtable
+    try {
+      const records = await getContinueWatching(user.id);
+      list = records.map(r => ({
+        id: parseInt(r.fields.TmdbId),
+        type: r.fields.Type,
+        season: r.fields.Season || 1,
+        episode: r.fields.Episode || 1,
+        timestamp: r.fields.Timestamp || 0
+      }));
+    } catch (e) {
+      console.warn('Failed to load continue from Airtable, falling back to localStorage', e);
+      list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
+    }
+  } else {
+    list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
+  }
+
+  if (list.length === 0) return;
 
   const section = document.createElement('section');
   section.id = 'continueSection';
@@ -221,8 +222,17 @@ async function loadContinueWatchingRow() {
 
   await renderContinueItems(list, rowDiv);
 
-  document.getElementById('clearContinueBtn').addEventListener('click', function() {
+  document.getElementById('clearContinueBtn').addEventListener('click', async function() {
     if (confirm('Remove all items from Continue Watching?')) {
+      if (user) {
+        // Delete all from Airtable
+        try {
+          const records = await getContinueWatching(user.id);
+          for (const rec of records) {
+            await deleteContinueWatching(rec.id);
+          }
+        } catch (e) { console.warn('Could not clear cloud continue', e); }
+      }
       localStorage.removeItem('continueWatchingList');
       localStorage.removeItem('continueWatching');
       const section = document.getElementById('continueSection');
@@ -263,9 +273,19 @@ async function renderContinueItems(list, container) {
       delBtn.style.transition = '0.3s';
       delBtn.onmouseover = () => delBtn.style.background = '#ff3333';
       delBtn.onmouseout = () => delBtn.style.background = 'rgba(255,0,0,0.7)';
-      delBtn.onclick = (e) => {
+      delBtn.onclick = async (e) => {
         e.stopPropagation();
         if (confirm(`Remove "${data.title || data.name}" from continue watching?`)) {
+          // Remove from Airtable if logged in
+          const user = getSession();
+          if (user) {
+            try {
+              const records = await getContinueWatching(user.id);
+              const found = records.find(r => r.fields.TmdbId === String(entry.id) && r.fields.Type === entry.type);
+              if (found) await deleteContinueWatching(found.id);
+            } catch (e) { console.warn('Could not remove from cloud', e); }
+          }
+          // Remove from local
           let list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
           list = list.filter(item => !(item.id == entry.id && item.type === entry.type));
           localStorage.setItem('continueWatchingList', JSON.stringify(list));
@@ -274,7 +294,7 @@ async function renderContinueItems(list, container) {
             localStorage.removeItem('continueWatching');
           }
           const row = document.getElementById('continueRow');
-          renderContinueItems(list, row);
+          await renderContinueItems(list, row);
           if (list.length === 0) {
             const section = document.getElementById('continueSection');
             if (section) section.style.display = 'none';
@@ -308,4 +328,5 @@ async function renderContinueItems(list, container) {
   }
 }
 
-loadContinueWatchingRow();
+// Load continue row after auth header update
+setTimeout(loadContinueWatchingRow, 500);

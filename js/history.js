@@ -1,38 +1,34 @@
 const container = document.getElementById("continueCard");
 const clearBtn = document.getElementById("clearHistoryBtn");
 
-function getContinueList() {
-  return JSON.parse(localStorage.getItem('continueWatchingList')) || [];
-}
-function saveContinueList(list) {
-  localStorage.setItem('continueWatchingList', JSON.stringify(list));
-}
-
-function clearAllHistory() {
-  if (confirm("Clear all continue watching history?")) {
-    saveContinueList([]);
-    renderList();
-  }
-}
-
-function removeItem(id, type) {
-  if (confirm("Remove this item from continue watching?")) {
-    let list = getContinueList();
-    list = list.filter(item => !(item.id == id && item.type === type));
-    saveContinueList(list);
-    renderList();
-  }
-}
-
 async function renderList() {
-  const list = getContinueList();
+  const user = getSession();
+  let list = [];
+  if (user) {
+    try {
+      const records = await getContinueWatching(user.id);
+      list = records.map(r => ({
+        id: parseInt(r.fields.TmdbId),
+        type: r.fields.Type,
+        season: r.fields.Season || 1,
+        episode: r.fields.Episode || 1,
+        timestamp: r.fields.Timestamp || 0,
+        recordId: r.id
+      }));
+    } catch (e) {
+      console.warn('Could not load continue from cloud, using local', e);
+      list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
+    }
+  } else {
+    list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
+  }
+
   container.innerHTML = '';
   if (list.length === 0) {
     container.innerHTML = `<p class="empty-history">No history to continue.</p>`;
     return;
   }
 
-  // Newest first
   list.sort((a, b) => b.timestamp - a.timestamp);
 
   for (const entry of list) {
@@ -48,7 +44,6 @@ async function renderList() {
       wrapper.style.maxWidth = "500px";
       wrapper.style.marginBottom = "20px";
 
-      // Remove button
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-continue-btn";
       removeBtn.innerHTML = '<i class="fas fa-times"></i>';
@@ -67,13 +62,32 @@ async function renderList() {
       removeBtn.style.transition = "0.3s";
       removeBtn.onmouseover = () => removeBtn.style.background = "#ff3333";
       removeBtn.onmouseout = () => removeBtn.style.background = "rgba(255,0,0,0.7)";
-      removeBtn.onclick = (e) => {
+      removeBtn.onclick = async (e) => {
         e.stopPropagation();
-        removeItem(entry.id, entry.type);
+        if (confirm(`Remove "${data.title || data.name}" from continue watching?`)) {
+          if (user) {
+            try {
+              if (entry.recordId) {
+                await deleteContinueWatching(entry.recordId);
+              } else {
+                const records = await getContinueWatching(user.id);
+                const found = records.find(r => r.fields.TmdbId === String(entry.id) && r.fields.Type === entry.type);
+                if (found) await deleteContinueWatching(found.id);
+              }
+            } catch (e) { console.warn('Could not delete from cloud', e); }
+          }
+          let list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
+          list = list.filter(item => !(item.id == entry.id && item.type === entry.type));
+          localStorage.setItem('continueWatchingList', JSON.stringify(list));
+          const single = JSON.parse(localStorage.getItem('continueWatching'));
+          if (single && single.id == entry.id && single.type === entry.type) {
+            localStorage.removeItem('continueWatching');
+          }
+          renderList();
+        }
       };
       wrapper.appendChild(removeBtn);
 
-      // Card
       const card = document.createElement("div");
       card.className = "card";
       card.style.display = "flex";
@@ -142,7 +156,6 @@ async function renderList() {
       resumeBtn.onmouseover = () => resumeBtn.style.boxShadow = "0 0 20px rgba(0,212,255,0.3)";
       resumeBtn.onmouseout = () => resumeBtn.style.boxShadow = "none";
       resumeBtn.onclick = () => {
-        // Store the single‑entry version so player.js picks it up
         const single = { id: entry.id, type: entry.type, season: entry.season, episode: entry.episode };
         localStorage.setItem('continueWatching', JSON.stringify(single));
         location.href = `player.html?id=${entry.id}&type=${entry.type}`;
@@ -152,7 +165,6 @@ async function renderList() {
       card.appendChild(info);
       wrapper.appendChild(card);
       container.appendChild(wrapper);
-
     } catch (error) {
       console.error("Error loading continue item:", error);
       const fallback = document.createElement("div");
@@ -166,5 +178,21 @@ async function renderList() {
   }
 }
 
-clearBtn.addEventListener("click", clearAllHistory);
+clearBtn.addEventListener("click", async () => {
+  if (confirm("Clear all continue watching history?")) {
+    const user = getSession();
+    if (user) {
+      try {
+        const records = await getContinueWatching(user.id);
+        for (const rec of records) {
+          await deleteContinueWatching(rec.id);
+        }
+      } catch (e) { console.warn('Could not clear cloud continue', e); }
+    }
+    localStorage.removeItem('continueWatchingList');
+    localStorage.removeItem('continueWatching');
+    renderList();
+  }
+});
+
 renderList();

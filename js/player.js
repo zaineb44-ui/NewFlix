@@ -6,7 +6,6 @@ let currentSource = localStorage.getItem("preferredSource") || "vidfast";
 let currentSeason = 1;
 let currentEpisode = 1;
 
-// Source buttons
 document.querySelectorAll(".source-btn").forEach(btn => {
   if (btn.dataset.source === currentSource) btn.classList.add("active");
   btn.addEventListener("click", () => {
@@ -26,7 +25,6 @@ async function loadInfo() {
     document.getElementById("mediaOverview").innerText = data.overview;
     if (type === "tv") {
       buildSeasons(data.seasons);
-      // show the controls row
       document.getElementById("controlsWrapper").style.display = "flex";
     }
   } catch (e) { console.error(e); }
@@ -58,7 +56,9 @@ function loadPlayer() {
   saveContinueWatching();
 }
 
-function saveContinueWatching() {
+async function saveContinueWatching() {
+  const user = getSession();
+  // Save to localStorage always
   let list = JSON.parse(localStorage.getItem('continueWatchingList')) || [];
   const newEntry = {
     id: id, type: type,
@@ -70,16 +70,24 @@ function saveContinueWatching() {
   else list.push(newEntry);
   localStorage.setItem('continueWatchingList', JSON.stringify(list));
   localStorage.setItem('continueWatching', JSON.stringify(newEntry));
+
+  // Save to Airtable if logged in
+  if (user) {
+    try {
+      await addContinueWatching(user.id, id, type, currentSeason, currentEpisode);
+    } catch (e) {
+      console.warn('Could not save continue to cloud', e);
+    }
+  }
 }
 
-// ─── TV show helpers ───
+// ── TV show helpers ──
 async function buildSeasons(seasons) {
   const seasonContainer = document.getElementById("seasonButtons");
   const episodeContainer = document.getElementById("episodeButtons");
   const episodeSection = document.getElementById("episodeSection");
 
   seasonContainer.innerHTML = "";
-  // Filter out season 0 (specials)
   const validSeasons = seasons.filter(s => s.season_number > 0);
   validSeasons.forEach(season => {
     const btn = document.createElement("button");
@@ -93,11 +101,9 @@ async function buildSeasons(seasons) {
     };
     seasonContainer.appendChild(btn);
   });
-  // Load episodes for first season (1) if available
   if (validSeasons.length > 0) {
     loadEpisodes(1);
   } else {
-    // fallback
     episodeSection.style.display = "none";
   }
 }
